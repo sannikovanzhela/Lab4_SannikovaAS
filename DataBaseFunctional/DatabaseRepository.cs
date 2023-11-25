@@ -1,5 +1,4 @@
-﻿using System.Data.SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -23,10 +22,10 @@ namespace DataBaseFunctional
 
         public string GetByID(int id)
         {
-            if (id <= 0) return "ID cannot be zero";
+            if (id <= 0) return "ID should be more zero";
 
             bool flag;
-            string information = "ID: "+id+"\n";
+            string name, message;
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -41,16 +40,15 @@ namespace DataBaseFunctional
                     if (!flag) return "This Information isn't exist";
 
                     command.CommandText = "select name from Informations where ID =@id";
-                    information += "Name: "+command.ExecuteScalarAsync().Result.ToString()+"\n";
+                    name = command.ExecuteScalarAsync().Result.ToString();
 
-                    command.CommandText = "select message from Indormations where ID =@id";
-                    information += "Message: "+command.ExecuteScalarAsync().Result.ToString();
+                    command.CommandText = "select message from Informations where ID =@id";
+                    message = command.ExecuteScalarAsync().Result.ToString();
 
                     connection.Close();
                 }
             }
-
-            return information;
+            return "ID: " + id + "\nName: "+name+"\nMessage: "+message;
         }
 
         public string GetByName(string name)
@@ -59,7 +57,7 @@ namespace DataBaseFunctional
                 return "Name is empty";
 
             bool flag;
-            string information = "ID: ";
+            string id, message;
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -74,16 +72,16 @@ namespace DataBaseFunctional
                     if (!flag) return "Information isn't exist";
 
                     command.CommandText = "select ID from Informations where name =@name";
-                    information += Convert.ToInt32(command.ExecuteScalarAsync()) + "\nName: "+name+"\n";
+                    id = command.ExecuteScalarAsync().Result.ToString();
 
-                    command.CommandText = "select message from Indormations where name =@name";
-                    information += "Message: " + command.ExecuteScalarAsync().Result.ToString();
+                    command.CommandText = "select message from Informations where name =@name";
+                    message = command.ExecuteScalarAsync().Result.ToString();
 
                     connection.Close();
                 }
             }
 
-            return information;
+            return "ID: " + id + "\nName: " + name + "\nMessage: " + message;
         }
 
         public string Add(int id, string name, string message)
@@ -107,12 +105,12 @@ namespace DataBaseFunctional
                     command.Parameters.Add("@id", SqlDbType.Int).Value = id;
                     flag = command.ExecuteScalar() == null ? false : true;
 
-                    if (!flag) return "This Information is exist";
+                    if (flag == true ) return "This Information is exist";
 
-                    command.CommandText = "insert into Informations(ID, name, message) values (@id, @name, @message)";
-                    command.Parameters.Add("@id", SqlDbType.Int).Value = id;
+                    command.CommandText = "insert into Informations values (@id, @name, @message)";
                     command.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
                     command.Parameters.Add("@message", SqlDbType.NVarChar).Value = message;
+                    command.ExecuteNonQuery();
                     connection.Close();
                 }
             }
@@ -180,6 +178,22 @@ namespace DataBaseFunctional
             }
 
             return "Information is updated";
+        }
+
+        public void DeleteAll()
+        {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                using (var command = new SqlCommand())
+                {
+                    connection.Open();
+                    command.Connection = connection;
+                    command.CommandText = "delete from Informations";
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
+            }
         }
     }
 }

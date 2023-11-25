@@ -5,12 +5,12 @@ using System.Data.SqlClient;
 
 string connectionString = $"Data Source = LAPTOP-1BQG2FKL\\SQLEXPRESS; Initial Catalog = InfoMessageDB; Integrated Security=true";
 
-string link = "https://habr.com/ru/articles/";
+string link = "https://bkrs.info/taolun/thread-316489.html";
 using (IWebDriver driver = new ChromeDriver())
 {
     driver.Navigate().GoToUrl(link);
 
-    var posts = driver.FindElements(By.TagName("article"));
+    var posts = driver.FindElements(By.ClassName("post"));
 
     DatabaseRepository db = new DatabaseRepository();
 
@@ -20,9 +20,9 @@ using (IWebDriver driver = new ChromeDriver())
 
         foreach (var post in posts)
         {
-            int id = int.Parse(post.GetAttribute("id"));
-            string name = post.FindElement(By.ClassName("tm-user-info__username")).Text;
-            string message = post.FindElement(By.CssSelector(".article-formatted-body.article-formatted-body")).Text;
+            int id = int.Parse(post.FindElement(By.CssSelector(".number_checkbox_inner > a")).Text);
+            string name = post.FindElement(By.CssSelector(".largetext > a")).Text;
+            string message = post.FindElement(By.ClassName("post_body")).Text;
 
             db.Add(id, name, message);
         }
