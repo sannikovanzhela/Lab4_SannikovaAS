@@ -13,8 +13,7 @@ namespace TestDB
         [SetUp]
         public void Init() 
         {
-            string connection = "Data Source = LAPTOP-1BQG2FKL\\SQLEXPRESS; Initial Catalog = InfoMessageDB; Integrated Security=true";
-            db = new DatabaseRepository(connection);
+            db = new DatabaseRepository();
         }
 
         [Test]

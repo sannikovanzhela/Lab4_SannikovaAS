@@ -16,9 +16,9 @@ namespace DataBaseFunctional
     public class DatabaseRepository
     {
         private readonly string _connectionString;
-        public DatabaseRepository(string connectionString) 
+        public DatabaseRepository() 
         { 
-            this._connectionString = connectionString;
+            _connectionString = "Data Source = LAPTOP-1BQG2FKL\\SQLEXPRESS; Initial Catalog = InfoMessageDB; Integrated Security=true";
         }
 
         public string GetByID(int id)

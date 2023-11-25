@@ -3,54 +3,29 @@ using OpenQA.Selenium.Chrome;
 using DataBaseFunctional;
 using System.Data.SqlClient;
 
-string connection = "Data Source = LAPTOP-1BQG2FKL\\SQLEXPRESS; Initial Catalog = InfoMessageDB; Integrated Security=true";
+string connectionString = $"Data Source = LAPTOP-1BQG2FKL\\SQLEXPRESS; Initial Catalog = InfoMessageDB; Integrated Security=true";
 
-IWebDriver driver = new ChromeDriver();
-driver.Url = @"https://bkrs.info/taolun/thread-327516.html";
-
-var id = driver.FindElements(By.ClassName("forum-post-number"));
-var names = driver.FindElements(By.ClassName("forum-user-name"));
-var messages = driver.FindElements(By.ClassName("hor-not-fit-element"));
-
-List<string> listId = new List<string>();
-List<string> listNames = new List<string>();
-List<string> listMessages = new List<string>();
-
-foreach (var item in id)
-    listId.Add(item.Text);
-foreach (var item in names)
-    listNames.Add(item.Text);
-foreach (var item in messages)
-    listMessages.Add(item.Text);
-
-
-DatabaseRepository db = new DatabaseRepository(connection);
-
-for (int i = 0; i < listId.Count; i++)
+string link = "https://www.banki.ru/forum/?PAGE_NAME=read&FID=61&TID=203136";
+using (IWebDriver driver = new ChromeDriver())
 {
-    listId[i].Split('#');
-    db.Add(Convert.ToInt32(listId[i].Substring(1)), listNames[i], listMessages[i]);
+    driver.Navigate().GoToUrl(link);
+
+    var posts = driver.FindElements(By.TagName("table"));
+
+    DatabaseRepository db = new DatabaseRepository();
+
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+
+        foreach (var post in posts)
+        {
+            int id = int.Parse(post.GetAttribute("id"));
+            string name = post.FindElement(By.ClassName("forum-user-name")).Text;
+            string message = post.FindElement(By.CssSelector(".hor-not-fit-element__content.display-block")).Text;
+
+            db.Add(id, name, message);
+        }
+
+    }
 }
-
-Thread.Sleep(2000);
-driver.Quit();
-
-
-
-//string link = "https://bkrs.info/taolun/thread-327516.html";
-//using (IWebDriver driver = new ChromeDriver())
-//{
-//    driver.Navigate().GoToUrl(link);
-
-//    var list = driver.FindElements(By.CssSelector(".post.classic"));
-
-//    foreach (var item in list)
-//    {
-//        int id = Convert.ToInt32(item.FindElement(By.ClassName("number_checkbox_inner")));
-//        string name = item.FindElement(By.ClassName("largetext")).Text;
-//        string message = item.FindElement(By.ClassName("post_body")).Text;
-
-//        DatabaseRepository database = new DatabaseRepository(connection);
-//        database.Add(id, name, message);
-//    }
-//}
